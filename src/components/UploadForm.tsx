@@ -235,21 +235,27 @@ export const UploadForm: React.FC<Props> = ({ onAnalyze, isAnalyzing }) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: trimmed })
         });
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data)) {
-          setSearchResults(prev => {
-            const merged = [...prev];
-            json.data.forEach((backendObj: { name: string; ticker: string }) => {
-              if (!merged.some(item => item.ticker === backendObj.ticker)) {
-                merged.push({
-                  name: backendObj.name,
-                  ticker: backendObj.ticker,
-                  chosung: getChosung(backendObj.name)
-                });
-              }
+        
+        const contentType = res.headers.get("content-type");
+        if (res.ok && contentType && contentType.includes("application/json")) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data)) {
+            setSearchResults(prev => {
+              const merged = [...prev];
+              json.data.forEach((backendObj: { name: string; ticker: string }) => {
+                if (!merged.some(item => item.ticker === backendObj.ticker)) {
+                  merged.push({
+                    name: backendObj.name,
+                    ticker: backendObj.ticker,
+                    chosung: getChosung(backendObj.name)
+                  });
+                }
+              });
+              return merged.slice(0, 8); // Display at most 8 items
             });
-            return merged.slice(0, 8); // Display at most 8 items
-          });
+          }
+        } else {
+          console.warn("AI supplementary lookup was not successful or returned non-JSON. Status:", res.status);
         }
       } catch (err) {
         console.warn("AI supplementary lookup error:", err);
@@ -302,27 +308,56 @@ export const UploadForm: React.FC<Props> = ({ onAnalyze, isAnalyzing }) => {
   const handleTickerFetch = async (targetTicker: string) => {
     if (!targetTicker.trim()) return;
     
-    const cleanTicker = targetTicker.trim().toUpperCase();
+    let resolvedTicker = targetTicker.trim().toUpperCase();
+    
+    // Check if the input contains Korean characters to resolve to a valid ticker first
+    const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(targetTicker);
+    
+    if (hasKorean) {
+      const match = STOCK_DATABASE.find(
+        item => item.name.toLowerCase() === targetTicker.trim().toLowerCase() ||
+                item.name.replace(/\s+/g, '').toLowerCase() === targetTicker.trim().replace(/\s+/g, '').toLowerCase()
+      ) || searchResults.find(
+        item => item.name.toLowerCase() === targetTicker.trim().toLowerCase()
+      ) || searchResults[0] || STOCK_DATABASE.find(
+        item => item.name.toLowerCase().includes(targetTicker.trim().toLowerCase())
+      );
+      
+      if (match) {
+        resolvedTicker = match.ticker;
+        triggerNotification(
+          language === "ko"
+            ? `'${targetTicker}'(을)를 종목코드 '${resolvedTicker}'(으)로 자동으로 매칭하여 데이터를 비교분석합니다.`
+            : `Automatically resolved '${targetTicker}' to ticker '${resolvedTicker}'.`
+        );
+      } else {
+        const koMsg = `'${targetTicker}'에 매칭되는 종목 코드를 찾을 수 없습니다. 자동완성 목록에서 선택하거나, 영문 티커(예: AAPL) 또는 하단의 돋보기 검색을 이용해 주세요.`;
+        const enMsg = `Could not resolve '${targetTicker}' to a valid ticker. Please select from autocomplete or enter a precise symbol.`;
+        setErrorMessage(language === "ko" ? koMsg : enMsg);
+        return;
+      }
+    }
+
     setIsFetchingTicker(true);
     setErrorMessage(null);
 
     try {
       if (customFmpKey.trim() && customFmpKey.trim() !== "") {
         // Live Fetch from FMP API
-        const data = await fetchFinancialData(cleanTicker, customFmpKey.trim());
+        const data = await fetchFinancialData(resolvedTicker, customFmpKey.trim());
         const formattedText = formatFmpDataToText(data);
 
-        triggerNotification(`${cleanTicker} FMP API data retrieved! Calling AI analysis system...`);
+        triggerNotification(`${resolvedTicker} FMP API data retrieved! Calling AI analysis system...`);
         onAnalyze(formattedText);
       } else {
         // High-Fidelity Local Simulation Fallback with high premium UX
         triggerNotification(
           language === "ko" 
             ? `주의: 현재 FMP API KEY가 등록되지 않아 가상 시뮬레이션 데이터를 전송합니다.` 
-            : `FMP Key is empty. Loading high-fidelity historical simulated ledger for ticker ${cleanTicker}...`
+            : `FMP Key is empty. Loading high-fidelity historical simulated ledger for ticker ${resolvedTicker}...`
         );
 
-        const simResult = getSimulatedFmpData(cleanTicker);
+        const simResult = getSimulatedFmpData(resolvedTicker);
         const formattedSimText = formatFmpDataToText(simResult);
         
         onAnalyze(formattedSimText);

@@ -211,8 +211,8 @@ export const DynamicDashboardCharts: React.FC<Props> = ({ data }) => {
           </p>
         </div>
 
-        <div className="h-[280px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[280px] w-full min-w-0">
+          <ResponsiveContainer width="100%" height={280} minWidth={0}>
             <ComposedChart data={composedTrendData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
               <XAxis dataKey="year" stroke="#94A3B8" fontSize={11} tickLine={false} axisLine={false} />
@@ -265,8 +265,8 @@ export const DynamicDashboardCharts: React.FC<Props> = ({ data }) => {
           </p>
         </div>
 
-        <div className="h-[280px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[280px] w-full min-w-0">
+          <ResponsiveContainer width="100%" height={280} minWidth={0}>
             <BarChart data={profitabilityComparisonData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
               <XAxis dataKey="metric" stroke="#94A3B8" fontSize={11} tickLine={false} axisLine={false} />
@@ -301,8 +301,8 @@ export const DynamicDashboardCharts: React.FC<Props> = ({ data }) => {
           </p>
         </div>
 
-        <div className="h-[280px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[280px] w-full min-w-0">
+          <ResponsiveContainer width="100%" height={280} minWidth={0}>
             <BarChart data={waterfallData} margin={{ top: 15, right: 10, left: 0, bottom: 0 }} stackOffset="sign">
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
               <XAxis dataKey="name" stroke="#94A3B8" fontSize={11} tickLine={false} axisLine={false} />
@@ -354,8 +354,8 @@ export const DynamicDashboardCharts: React.FC<Props> = ({ data }) => {
           </p>
         </div>
 
-        <div className="h-[280px] w-full flex items-center justify-center">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[280px] w-full flex items-center justify-center min-w-0">
+          <ResponsiveContainer width="100%" height={280} minWidth={0}>
             <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
               <PolarGrid stroke="#F1F5F9" />
               <PolarAngleAxis dataKey="subject" tick={{ fill: "#64748B", fontSize: 10, fontWeight: 700 }} />

@@ -30,8 +30,8 @@ export const FinancialChart: React.FC<Props> = ({ yearOverYearData }) => {
           <h3 className="text-base font-bold text-text-primary">Earning Power YoY</h3>
           <p className="text-xs text-text-secondary mb-6">Revenue expansion matched with EBITDA & Net Profit margins</p>
         </div>
-        <div className="h-[280px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[280px] w-full min-w-0">
+          <ResponsiveContainer width="100%" height={280} minWidth={0}>
             <LineChart data={yearOverYearData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
               <XAxis dataKey="year" stroke="var(--color-text-secondary)" fontSize={11} tickLine={false} axisLine={false} />
@@ -55,8 +55,8 @@ export const FinancialChart: React.FC<Props> = ({ yearOverYearData }) => {
           <h3 className="text-base font-bold text-text-primary">Capital Structure Growth</h3>
           <p className="text-xs text-text-secondary mb-6">Balance sheet leverage ratio between Liabilities & Equity</p>
         </div>
-        <div className="h-[280px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[280px] w-full min-w-0">
+          <ResponsiveContainer width="100%" height={280} minWidth={0}>
             <BarChart data={yearOverYearData} stackOffset="sign">
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" />
               <XAxis dataKey="year" stroke="var(--color-text-secondary)" fontSize={11} tickLine={false} axisLine={false} />
@@ -79,8 +79,8 @@ export const FinancialChart: React.FC<Props> = ({ yearOverYearData }) => {
           <h3 className="text-base font-bold text-text-primary">Liquidity & Cash Conversion Trend</h3>
           <p className="text-xs text-text-secondary mb-6">Comparison of Cash Flows from Operations with fully realized Free Cash Flow (FCF)</p>
         </div>
-        <div className="h-[280px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[280px] w-full min-w-0">
+          <ResponsiveContainer width="100%" height={280} minWidth={0}>
             <AreaChart data={yearOverYearData}>
               <defs>
                 <linearGradient id="colorOcf" x1="0" y1="0" x2="0" y2="1">

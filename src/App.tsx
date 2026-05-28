@@ -218,26 +218,32 @@ export function AppContent() {
         body: JSON.stringify({ textContent: text }),
       });
       
-      const result: ApiResponse<AnalysisResult> = await response.json();
-      
-      if (result.success && result.data) {
-        setAnalysisData(result.data);
-        setIsDemoView(false);
-        try {
-          saveAnalysisResult(
-            result.data.company.name,
-            result.data.company.name.slice(0, 4).toUpperCase(),
-            result.data.company.industry || "General",
-            result.data,
-            "Uploaded_Interactive_Filing.txt"
-          );
-        } catch (storageError) {
-          console.error("Storage error on upload analysis completion", storageError);
+      const contentType = response.headers.get("content-type");
+      if (response.ok && contentType && contentType.includes("application/json")) {
+        const result: ApiResponse<AnalysisResult> = await response.json();
+        
+        if (result.success && result.data) {
+          setAnalysisData(result.data);
+          setIsDemoView(false);
+          try {
+            saveAnalysisResult(
+              result.data.company.name,
+              result.data.company.name.slice(0, 4).toUpperCase(),
+              result.data.company.industry || "General",
+              result.data,
+              "Uploaded_Interactive_Filing.txt"
+            );
+          } catch (storageError) {
+            console.error("Storage error on upload analysis completion", storageError);
+          }
+          setActiveTab("dashboard");
+        } else {
+          // Backend key empty or unconfigured fallback
+          console.warn("Backend failed or key missing. Triggering semantic fallback parser.");
+          triggerFallbackMockAnalysis(text);
         }
-        setActiveTab("dashboard");
       } else {
-        // Backend key empty or unconfigured fallback
-        console.warn("Backend failed or key missing. Triggering semantic fallback parser.");
+        console.warn("Backend unavailable or returned non-JSON. Triggering semantic fallback parser. Status:", response.status);
         triggerFallbackMockAnalysis(text);
       }
     } catch (err) {

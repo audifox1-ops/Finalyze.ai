@@ -136,8 +136,8 @@ export const StrengthsWeaknessesAnalysis: React.FC<Props> = ({ data }) => {
             <p className="text-xs text-text-secondary mt-1">Multi-axis health score comparison vs Sector Standard averages</p>
           </div>
 
-          <div className="h-[300px] w-full flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-[300px] w-full flex items-center justify-center min-w-0">
+            <ResponsiveContainer width="100%" height={300} minWidth={0}>
               <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
                 <PolarGrid stroke="var(--color-border)" />
                 <PolarAngleAxis dataKey="subject" tick={{ fill: "var(--color-text-secondary)", fontSize: 10, fontWeight: 700 }} />
@@ -188,8 +188,8 @@ export const StrengthsWeaknessesAnalysis: React.FC<Props> = ({ data }) => {
               </div>
               
               {/* Sparkline layout embedding trend */}
-              <div className="h-[40px] w-full pt-1 border-t border-border">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[40px] w-full pt-1 border-t border-border min-w-0">
+                <ResponsiveContainer width="100%" height={40} minWidth={0}>
                   <AreaChart data={sortedYoY}>
                     <Area type="monotone" dataKey="operatingProfit" stroke="var(--color-primary-light)" strokeWidth={1.5} fill="var(--color-primary-bg)" fillOpacity={0.3} dot={{ r: 2 }} />
                   </AreaChart>
@@ -212,8 +212,8 @@ export const StrengthsWeaknessesAnalysis: React.FC<Props> = ({ data }) => {
               </div>
 
               {/* Sparkline */}
-              <div className="h-[40px] w-full pt-1 border-t border-border">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[40px] w-full pt-1 border-t border-border min-w-0">
+                <ResponsiveContainer width="100%" height={40} minWidth={0}>
                   <AreaChart data={sortedYoY}>
                     <Area type="monotone" dataKey="equity" stroke="var(--color-success)" strokeWidth={1.5} fill="#F0FDF4" fillOpacity={0.3} dot={{ r: 2 }} />
                   </AreaChart>
@@ -236,8 +236,8 @@ export const StrengthsWeaknessesAnalysis: React.FC<Props> = ({ data }) => {
               </div>
 
               {/* Sparkline */}
-              <div className="h-[40px] w-full pt-1 border-t border-border">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[40px] w-full pt-1 border-t border-border min-w-0">
+                <ResponsiveContainer width="100%" height={40} minWidth={0}>
                   <AreaChart data={sortedYoY}>
                     <Area type="monotone" dataKey="totalLiabilities" stroke="#64748B" strokeWidth={1.5} fill="#F8FAFC" fillOpacity={0.3} dot={{ r: 2 }} />
                   </AreaChart>
@@ -260,8 +260,8 @@ export const StrengthsWeaknessesAnalysis: React.FC<Props> = ({ data }) => {
               </div>
 
               {/* Sparkline */}
-              <div className="h-[40px] w-full pt-1 border-t border-border">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[40px] w-full pt-1 border-t border-border min-w-0">
+                <ResponsiveContainer width="100%" height={40} minWidth={0}>
                   <AreaChart data={sortedYoY}>
                     <Area type="monotone" dataKey="fcf" stroke="var(--color-primary-light)" strokeWidth={1.5} fill="var(--color-primary-bg)" fillOpacity={0.3} dot={{ r: 2 }} />
                   </AreaChart>
