@@ -6,6 +6,3 @@ coverage/
 *.log
 .env*
 !.env.example
-# 환경변수 파일 무시
-.env
-.env.local

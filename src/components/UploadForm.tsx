@@ -19,11 +19,13 @@ import {
   Clipboard,
   FolderOpen,
   Globe,
-  Settings
+  Settings,
+  Search
 } from "lucide-react";
 import { UploadedFile } from "../types";
 import { cn } from "../lib/utils";
 import { useTranslation } from "../lib/i18n";
+import { fetchFinancialData, formatFmpDataToText, getSimulatedFmpData } from "../lib/fetchFinancialData";
 
 interface Props {
   onAnalyze: (text: string) => void;
@@ -39,6 +41,7 @@ const localTranslations: Record<string, Record<string, string>> = {
     urlBtn: "URL 직접 입력",
     cameraBtn: "카메라로 스캔",
     clipboardBtn: "클립보드 탐색",
+    tickerBtn: "종목코드 검색",
     dropZoneLabel: "재무제표 또는 공정 사양서 파일을 드래그앤드롭 하거나, 아래 버튼을 눌러 다른 소스에서 가져오십시오.",
     pasteBtn: "추출하기",
     urlFetchBtn: "URL 파일 다운로드",
@@ -54,6 +57,11 @@ const localTranslations: Record<string, Record<string, string>> = {
     urlTitle: "공개 URL 웹 인제스트",
     cameraTitle: "모바일 카메라 OCR 스캐너",
     clipboardTitle: "클립보드 수동 모니터링",
+    tickerTitle: "FMP 금융 종목 데이터 불러오기",
+    tickerPlaceholder: "예: AAPL, MSFT, 또는 005930.KS (KOSPI는 .KS, KOSDAQ은 .KQ)",
+    tickerFetchBtn: "데이터 조회",
+    tickerDesc: "FMP(Financial Modeling Prep) API를 통해 고정밀 3대 재무제표(매출, 부채, 자재 영업현금흐름)를 직접 가져와 AI 분석 엔진에 연결합니다.",
+    tickerAlertKey: "주의: 현재 FMP API KEY(VITE_FMP_API_KEY)가 등록되지 않았습니다. 데모 시뮬레이터를 작동하며 해당 기업의 사전 빌드된 고정밀 재무회계 장부를 AI 분석 시스템에 투입합니다.",
     corsWarning: "안내: 크로스 도메인 제한 시 샌드박스 프록시가 자동으로 파일을 보완 로드합니다.",
     cameraSimulated: "PC 환경 웹캠 감지로 자동 프레임 매칭을 활성화합니다.",
     scannerScanning: "이미지 외형 정밀 복원 & OCR 치수 매핑 수행 중...",
@@ -69,6 +77,7 @@ const localTranslations: Record<string, Record<string, string>> = {
     urlBtn: "Fetch from URL",
     cameraBtn: "Camera Scan",
     clipboardBtn: "Clipboard Scan",
+    tickerBtn: "Ticker Search",
     dropZoneLabel: "Drag and drop financial sheets or dimensional specs here, or choose one of the alternative channels below.",
     pasteBtn: "Extract",
     urlFetchBtn: "Download URL File",
@@ -84,6 +93,11 @@ const localTranslations: Record<string, Record<string, string>> = {
     urlTitle: "Public URL Web Ingestion",
     cameraTitle: "Mobile Camera OCR Scanner",
     clipboardTitle: "Clipboard Scanning Mode",
+    tickerTitle: "FMP Financial Ticker Import",
+    tickerPlaceholder: "e.g., AAPL, MSFT, or 005930.KS (Korean stocks require .KS/.KQ suffix)",
+    tickerFetchBtn: "Retrieve Data",
+    tickerDesc: "Queries Financial Modeling Prep (FMP) APIs to securely grab exact 3-year historical Income, Balance, and Cash Flow statement tables.",
+    tickerAlertKey: "Mock Simulator triggered: API Key is not set. We will load historical high-fidelity simulated ledger metrics to maintain core AI pipeline review.",
     corsWarning: "Notice: CORS rules apply. Sandboxed proxy fallback is automated if direct fetch is blocked.",
     cameraSimulated: "Simulating mobile camera scan. Desk cam interface loaded.",
     scannerScanning: "Analyzing dimensional shapes and OCR reading...",
@@ -99,9 +113,10 @@ const localTranslations: Record<string, Record<string, string>> = {
     urlBtn: "URLから取得",
     cameraBtn: "カメラでスキャン",
     clipboardBtn: "クリップボード",
+    tickerBtn: "銘柄コード検索",
     dropZoneLabel: "財務諸表または加工仕様書ファイルをドラッグ＆ドロップするか、以下のボタンを選択してください。",
     pasteBtn: "インポート",
-    urlFetchBtn: "URLファイルをダウンロード",
+    urlFetchBtn: "URL-Dateien herunterladen",
     urlPlaceholder: "https://example.com/company_reports.pdf",
     cameraNoDevice: "カメラが見つからないか、アクセス権限がありません。",
     cameraCaptureBtn: "キャプチャして寸法分析を実行",
@@ -114,6 +129,11 @@ const localTranslations: Record<string, Record<string, string>> = {
     urlTitle: "公開URLウェブインジェ스트",
     cameraTitle: "モバイルカメラOCRスキャナー",
     clipboardTitle: "クリップボードスキャナー",
+    tickerTitle: "FMP 財務銘柄データインポート",
+    tickerPlaceholder: "例：AAPL, MSFT, 005930.KS (韓国銘柄は .KS / .KQ 必須)",
+    tickerFetchBtn: "データ照会",
+    tickerDesc: "FMP (Financial Modeling Prep) API を使用して、対象上場企業の最新の貸借対照表、損益計算書、キャッシュフローを直接フェッチします。",
+    tickerAlertKey: "デモモード：APIキーが設定されていないため、高精度のシミュレーションデータをロードします。",
     corsWarning: "注意: CORSポリシー制限時、プロキシダウンローダを自動展開します。",
     cameraSimulated: "デスクトップ環境ではカメラシミュレーションモードが有効になります。",
     scannerScanning: "寸法形状キャプチャおよびOCR読込を実行中...",
@@ -129,6 +149,7 @@ const localTranslations: Record<string, Record<string, string>> = {
     urlBtn: "输入 URL 地址",
     cameraBtn: "移动端相机扫描",
     clipboardBtn: "剪贴板导入",
+    tickerBtn: "股票代码搜索",
     dropZoneLabel: "将财务报表或锻造工艺书拖拽至此，或通过下方选项从其他源导入。",
     pasteBtn: "提取数据",
     urlFetchBtn: "下载 URL 文档",
@@ -144,6 +165,11 @@ const localTranslations: Record<string, Record<string, string>> = {
     urlTitle: "通用 URL 网页数据抓取",
     cameraTitle: "相机 OCR 扫描解析器",
     clipboardTitle: "剪切板智能监听",
+    tickerTitle: "FMP 财务报表数据拉取",
+    tickerPlaceholder: "例如: AAPL, MSFT, 或 005930.KS (韩国股票需加 .KS / .KQ)",
+    tickerFetchBtn: "检索数据",
+    tickerDesc: "利用 Financial Modeling Prep (FMP) 接口，直接提取包含利润表、资产负债表与现金流量表在内的三年期高精度历史财务总分类账。",
+    tickerAlertKey: "演示模式: 未检测到 API 密钥，加载仿真股票模拟数据。",
     corsWarning: "注意: 跨域由于安全策略遇阻时，系统已自动配用专用模拟解析层代收包。",
     cameraSimulated: "当前检测为台式设备，正在启用移动扫描模拟方案。",
     scannerScanning: "正在提取高斯工艺参数与数据转换...",
@@ -159,6 +185,7 @@ const localTranslations: Record<string, Record<string, string>> = {
     urlBtn: "URL Eingeben",
     cameraBtn: "Kamera Scan",
     clipboardBtn: "Zwischenablage",
+    tickerBtn: "Ticker Suche",
     dropZoneLabel: "G&V Berichte oder Schmiedepläne hier ablegen oder Option unten auswählen.",
     pasteBtn: "Importieren",
     urlFetchBtn: "URL-Datei Herunterladen",
@@ -174,6 +201,11 @@ const localTranslations: Record<string, Record<string, string>> = {
     urlTitle: "Datenquelle über URL beziehen",
     cameraTitle: "Kamera-Modul OCR Scanner",
     clipboardTitle: "Inhalt der Zwischenablage",
+    tickerTitle: "FMP Ticker-Daten Ingest",
+    tickerPlaceholder: "z.B. AAPL, MSFT, oder 005930.KS (Korea-Aktien benötigen .KS/.KQ)",
+    tickerFetchBtn: "Daten abrufen",
+    tickerDesc: "Rufen Sie die G&V, Bilanz und Kapitalflussrechnung der letzten 3 Jahre direkt über die Financial Modeling Prep (FMP) Schnittstelle ab.",
+    tickerAlertKey: "Demosimulation: Kein API-Wert vorliegend. Laden vorkonfigurierter Modellwerte für den ausgewählten Ticker.",
     corsWarning: "Hinweis: CORS Fehlertoleranz aktiviert. Ein Proxy-Fallback bürgt für Download-Sicherheit.",
     cameraSimulated: "Webcam-Simulation wird im Desktop-Modus geladen.",
     scannerScanning: "Formtoleranzen werden per OCR-Scanner ausgelesen...",
@@ -195,12 +227,15 @@ export const UploadForm: React.FC<Props> = ({ onAnalyze, isAnalyzing }) => {
   
   // Tab layout variables
   const [isPasting, setIsPasting] = useState(false);
-  const [activeUploadMethod, setActiveUploadMethod] = useState<"local" | "drive" | "url" | "camera" | "clipboard" | null>(null);
+  const [activeUploadMethod, setActiveUploadMethod] = useState<"local" | "drive" | "url" | "camera" | "clipboard" | "ticker" | null>(null);
 
   // Field states
   const [urlInput, setUrlInput] = useState("");
   const [pasteText, setPasteText] = useState("");
+  const [tickerInput, setTickerInput] = useState("");
+  const [customFmpKey, setCustomFmpKey] = useState("");
   const [isFetchingUrl, setIsFetchingUrl] = useState(false);
+  const [isFetchingTicker, setIsFetchingTicker] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastText, setToastText] = useState("");
 
@@ -215,6 +250,12 @@ export const UploadForm: React.FC<Props> = ({ onAnalyze, isAnalyzing }) => {
   const [showDriveConfig, setShowDriveConfig] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Synchronize environmental FMP key
+  useEffect(() => {
+    const key = (import.meta as any).env?.VITE_FMP_API_KEY || "";
+    setCustomFmpKey(key);
+  }, []);
 
   // Global Clipboard paste sensor
   useEffect(() => {
@@ -254,7 +295,7 @@ export const UploadForm: React.FC<Props> = ({ onAnalyze, isAnalyzing }) => {
   const triggerNotification = (text: string) => {
     setToastText(text);
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+    setTimeout(() => setShowToast(false), 3500);
   };
 
   const getFileIcon = (fileName: string) => {
@@ -285,7 +326,7 @@ export const UploadForm: React.FC<Props> = ({ onAnalyze, isAnalyzing }) => {
     }
   };
 
-  const processFile = (file: File, source: 'local' | 'drive' | 'url' | 'camera' | 'clipboard' = 'local') => {
+  const processFile = (file: File, source: 'local' | 'drive' | 'url' | 'camera' | 'clipboard' | 'ticker' = 'local') => {
     setErrorMessage(null);
     const validExtensions = ["pdf", "xlsx", "xls", "csv", "txt", "png", "jpg", "jpeg"];
     const ext = file.name.split(".").pop()?.toLowerCase();
@@ -439,6 +480,106 @@ export const UploadForm: React.FC<Props> = ({ onAnalyze, isAnalyzing }) => {
     }, 120);
   };
 
+  // Stock Ticker Search Handler (FMP integration with custom key & offline fallback simulation)
+  const handleTickerFetch = async () => {
+    if (!tickerInput.trim()) {
+      setErrorMessage("Please enter a stock ticker.");
+      return;
+    }
+
+    const cleanTicker = tickerInput.trim().toUpperCase();
+    setIsFetchingTicker(true);
+    setErrorMessage(null);
+
+    try {
+      if (customFmpKey.trim() && customFmpKey.trim() !== "") {
+        // Live Fetch from FMP API
+        const data = await fetchFinancialData(cleanTicker, customFmpKey.trim());
+        const formattedText = formatFmpDataToText(data);
+
+        const fileId = Math.random().toString(36).substring(7);
+        const newFileItem: UploadedFile = {
+          id: fileId,
+          name: `fmp_ticker_${cleanTicker}.txt`,
+          size: formattedText.length,
+          type: "txt",
+          source: "ticker" as any,
+          uploadedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: "success",
+          progress: 100,
+          extractedText: formattedText
+        };
+
+        setFiles((prev) => [...prev, newFileItem]);
+        setTickerInput("");
+        setActiveUploadMethod(null);
+        triggerNotification(`${cleanTicker} FMP API data retrieved! Calling AI analysis system...`);
+        
+        // Push directly to AI analysis engine
+        onAnalyze(formattedText);
+      } else {
+        // Fallback Mock System Simulator (Premium UX for empty key environments)
+        triggerNotification(lt("tickerAlertKey"));
+
+        const fileId = Math.random().toString(36).substring(7);
+        const mockFile: UploadedFile = {
+          id: fileId,
+          name: `simulated_ticker_${cleanTicker}.txt`,
+          size: 7850,
+          type: "txt",
+          source: "ticker" as any,
+          uploadedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: "uploading",
+          progress: 0,
+          extractedText: ""
+        };
+
+        setFiles((prev) => [...prev, mockFile]);
+
+        let p = 0;
+        const interval = setInterval(() => {
+          p += 25;
+          setFiles((prev) => 
+            prev.map((f) => 
+              f.id === fileId 
+                ? { ...f, progress: p } 
+                : f
+            )
+          );
+
+          if (p >= 100) {
+            clearInterval(interval);
+            const simResult = getSimulatedFmpData(cleanTicker);
+            const formattedSimText = formatFmpDataToText(simResult);
+
+            setFiles((prev) => 
+              prev.map((f) => 
+                f.id === fileId 
+                  ? { ...f, status: "success", extractedText: formattedSimText } 
+                  : f
+              )
+            );
+
+            setIsFetchingTicker(false);
+            setTickerInput("");
+            setActiveUploadMethod(null);
+            triggerNotification(`Simulated stock feed loaded for ticker ${simResult.symbol}! Dispatching to Gemini...`);
+            
+            // Auto dispatch
+            onAnalyze(formattedSimText);
+          }
+        }, 150);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setErrorMessage(err.message || "Failed to retrieve stock ticker parameters.");
+    } finally {
+      if (customFmpKey.trim()) {
+        setIsFetchingTicker(false);
+      }
+    }
+  };
+
   // Mobile Cam controls
   const startCamera = async () => {
     setErrorMessage(null);
@@ -528,9 +669,9 @@ export const UploadForm: React.FC<Props> = ({ onAnalyze, isAnalyzing }) => {
     <div className="w-full max-w-3xl mx-auto space-y-6 relative">
       
       {showToast && (
-        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-55 bg-indigo-950 text-white text-xs font-black px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 border border-slate-700 animate-in fade-in slide-in-from-top-4 duration-300">
-          <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
-          <span>{toastText}</span>
+        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-55 bg-slate-900 border border-slate-700 text-white text-xs font-semibold px-6 py-3.5 rounded-2xl shadow-2xl flex items-center gap-2 max-w-md animate-in fade-in slide-in-from-top-4 duration-300">
+          <CheckCircle2 size={15} className="text-amber-500 shrink-0" />
+          <span className="leading-normal">{toastText}</span>
         </div>
       )}
 
@@ -752,6 +893,68 @@ export const UploadForm: React.FC<Props> = ({ onAnalyze, isAnalyzing }) => {
                 </div>
               )}
 
+              {/* Ticker Search Tab Configuration (FMP Stock Search) */}
+              {activeUploadMethod === "ticker" && (
+                <div className="space-y-3 text-left animate-in fade-in duration-200">
+                  <h4 className="text-xs font-black text-slate-700 flex items-center gap-1.5 uppercase tracking-wider">
+                    <Search size={14} className="text-amber-500" />
+                    {lt("tickerTitle")}
+                  </h4>
+                  
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={tickerInput}
+                        onChange={(e) => setTickerInput(e.target.value)}
+                        placeholder={lt("tickerPlaceholder")}
+                        className="flex-1 text-xs font-bold px-3 py-2 bg-white border border-slate-200 focus:outline-none focus:border-amber-500 rounded-xl text-slate-700 uppercase placeholder:text-slate-400 placeholder:font-medium text-slate-800"
+                        disabled={isFetchingTicker}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleTickerFetch();
+                          }
+                        }}
+                      />
+                      <button 
+                        onClick={handleTickerFetch}
+                        disabled={isFetchingTicker || !tickerInput.trim()}
+                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 text-white font-black text-xs rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 shadow-sm"
+                      >
+                        {isFetchingTicker ? <Loader2 size={12} className="animate-spin" /> : <Search size={12} />}
+                        <span>{lt("tickerFetchBtn")}</span>
+                      </button>
+                    </div>
+
+                    <p className="text-[11px] text-slate-500 leading-normal">
+                      💡 {lt("tickerDesc")}
+                    </p>
+
+                    {/* FMP API Credentials management block */}
+                    <div className="bg-white p-3 rounded-2xl border border-slate-200 text-[10px] space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-600 uppercase text-[9px] tracking-wider">FMP API Key Credentials</span>
+                        <span className={cn(
+                          "px-1.5 py-0.5 rounded text-[8px] font-black tracking-wider uppercase",
+                          customFmpKey.trim() ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-amber-50 text-amber-600 border border-amber-100"
+                        )}>
+                          {customFmpKey.trim() ? "Keys Confirmed" : "Demo Simulation Mode Active"}
+                        </span>
+                      </div>
+                      <div className="flex gap-2.5">
+                        <input 
+                          type="password" 
+                          value={customFmpKey}
+                          onChange={(e) => setCustomFmpKey(e.target.value)}
+                          placeholder="FMP API Key를 기입하세요 (미기입 시 AAPL, Samsung 데모 구동)"
+                          className="flex-1 text-[10px] font-mono px-3 py-1.5 border border-slate-200 rounded-lg text-slate-700 bg-slate-50 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {activeUploadMethod === "camera" && (
                 <div className="text-center space-y-3">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-2">
@@ -814,20 +1017,21 @@ export const UploadForm: React.FC<Props> = ({ onAnalyze, isAnalyzing }) => {
           )}
 
           {errorMessage && (
-            <div className="mt-4 p-3 bg-danger/10 border border-danger/20 rounded-xl text-danger text-xs flex items-center gap-2 font-bold">
-              <AlertCircle size={14} className="shrink-0" />
+            <div className="mt-4 p-3 bg-rose-50 border border-rose-200 rounded-2xl text-rose-700 text-xs flex items-center gap-2 font-bold animate-pulse">
+              <AlertCircle size={15} className="shrink-0 text-rose-605" />
               <span>{errorMessage}</span>
             </div>
           )}
 
-          {/* Six different triggers array layout */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 mt-5 border-t border-slate-100 pt-5">
+          {/* 6 different triggers array layout (now with Stock Ticker Lookup as the 6th tab, making 7 total fields with text paste!) */}
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-2 mt-5 border-t border-slate-100 pt-5">
             {[
               { id: "local", label: lt("localBtn"), icon: UploadCloud, color: "hover:border-primary hover:text-primary hover:bg-primary-bg" },
               { id: "drive", label: lt("driveBtn"), icon: FolderOpen, color: "hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/50" },
               { id: "url", label: lt("urlBtn"), icon: Globe, color: "hover:border-teal-400 hover:text-teal-600 hover:bg-teal-50/50" },
               { id: "camera", label: lt("cameraBtn"), icon: Camera, color: "hover:border-rose-400 hover:text-rose-600 hover:bg-rose-50/50" },
-              { id: "clipboard", label: lt("clipboardBtn"), icon: Clipboard, color: "hover:border-slate-400 hover:text-slate-650 hover:bg-slate-50" }
+              { id: "clipboard", label: lt("clipboardBtn"), icon: Clipboard, color: "hover:border-slate-400 hover:text-slate-650 hover:bg-slate-50" },
+              { id: "ticker", label: lt("tickerBtn"), icon: Search, color: "hover:border-amber-400 hover:text-amber-600 hover:bg-amber-50" }
             ].map((method) => {
               const IconComp = method.icon;
               return (
@@ -842,12 +1046,12 @@ export const UploadForm: React.FC<Props> = ({ onAnalyze, isAnalyzing }) => {
                     }
                   }}
                   className={cn(
-                    "px-2 py-2.5 border border-slate-200 bg-white font-bold text-[11px] rounded-xl flex flex-col items-center justify-center gap-1 transition-all shadow-xs cursor-pointer select-none",
+                    "px-1 py-2.5 border border-slate-200 bg-white font-black text-[10px] sm:text-[11px] rounded-xl flex flex-col items-center justify-center gap-1 transition-all shadow-xs cursor-pointer select-none",
                     method.color,
-                    activeUploadMethod === method.id ? "bg-slate-150 border-slate-400 text-slate-800 scale-95" : "text-text-primary"
+                    activeUploadMethod === method.id ? "bg-slate-100 border-slate-400 text-slate-850 scale-95" : "text-text-primary"
                   )}
                 >
-                  <IconComp size={14} className="shrink-0" />
+                  <IconComp size={13} className="shrink-0" />
                   <span className="truncate w-full text-center">{method.label}</span>
                 </button>
               );
@@ -865,7 +1069,7 @@ export const UploadForm: React.FC<Props> = ({ onAnalyze, isAnalyzing }) => {
                 {files.map((file) => (
                   <div 
                     key={file.id} 
-                    className="p-3.5 bg-white border border-border rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 transition-all shadow-sm hover:border-slate-300"
+                    className="p-3.5 bg-white border border-border rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 transition-all shadow-sm hover:border-slate-300 animate-in fade-in duration-300"
                   >
                     <div className="flex items-center gap-3 overflow-hidden">
                       {getFileIcon(file.name)}
@@ -874,10 +1078,11 @@ export const UploadForm: React.FC<Props> = ({ onAnalyze, isAnalyzing }) => {
                           <p className="text-xs font-bold text-text-primary truncate max-w-[160px] sm:max-w-xs">{file.name}</p>
                           <span className={cn(
                             "px-1.5 py-0.5 text-[8px] rounded font-black uppercase tracking-wider shrink-0",
-                            file.source === "local" ? "bg-blue-50 text-blue-600" :
-                            file.source === "drive" ? "bg-indigo-50 text-indigo-600" :
-                            file.source === "url" ? "bg-teal-50 text-teal-600" :
-                            file.source === "camera" ? "bg-rose-50 text-rose-600" :
+                            file.source === "local" ? "bg-blue-50 text-blue-600 border border-blue-100" :
+                            file.source === "drive" ? "bg-indigo-50 text-indigo-600 border border-indigo-100" :
+                            file.source === "url" ? "bg-teal-50 text-teal-600 border border-teal-100" :
+                            file.source === "camera" ? "bg-rose-50 text-rose-600 border border-rose-100" :
+                            file.source === "ticker" ? "bg-amber-50 text-amber-600 border border-amber-100" :
                             "bg-slate-100 text-slate-600"
                           )}>
                             {file.source}
@@ -896,7 +1101,7 @@ export const UploadForm: React.FC<Props> = ({ onAnalyze, isAnalyzing }) => {
                         <div className="flex items-center gap-2 flex-1 sm:flex-initial justify-end">
                           <div className="w-16 bg-slate-100 h-1 rounded-full overflow-hidden">
                             <div 
-                              className="bg-primary h-full transition-all duration-300" 
+                               className="bg-primary h-full transition-all duration-300" 
                               style={{ width: `${file.progress}%` }}
                             />
                           </div>

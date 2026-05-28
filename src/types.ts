@@ -72,7 +72,7 @@ export interface UploadedFile {
   name: string;
   size: number;
   type: string;
-  source: 'local' | 'drive' | 'url' | 'camera' | 'clipboard';
+  source: 'local' | 'drive' | 'url' | 'camera' | 'clipboard' | 'ticker';
   uploadedAt: string;
   status: "idle" | "uploading" | "success" | "error";
   progress: number;
