@@ -1,0 +1,181 @@
+@import "./design-tokens.css";
+@import "tailwindcss";
+
+@theme {
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-bg: var(--primary-bg);
+  --color-surface: var(--bg-surface);
+  --color-surface-card: var(--bg-surface-card);
+  --color-border: var(--border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-text-primary;
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-body);
+    color: var(--color-text-secondary);
+  }
+
+  h1 {
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-h1);
+    color: var(--color-text-primary);
+  }
+
+  h2 {
+    font-size: var(--font-size-h2);
+    font-weight: var(--font-weight-h2);
+    color: var(--color-text-primary);
+  }
+}
+
+/* ==========================================
+   Professional High-Fidelity PDF Print Styles
+   ========================================== */
+@media print {
+  /* Hide interactive, non-print UI chrome */
+  header,
+  aside,
+  button,
+  a,
+  .print\:hidden,
+  .no-print,
+  #onboarding-guide-modal,
+  #onboarding-backdrop,
+  .feedback-btn,
+  #feedback-trigger,
+  .sidebar-toggle,
+  [role="button"],
+  iframe {
+    display: none !important;
+  }
+
+  /* Reset layout structure for absolute control printed flow page */
+  html, body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Stretch main workspace content to standard printed page width */
+  main {
+    position: static !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  /* Format Recharts responsive SVG frames to take print bounds cleanly */
+  .recharts-responsive-container {
+    width: 100% !important;
+    height: 300px !important;
+    min-height: 300px !important;
+    overflow: visible !important;
+  }
+
+  /* Force standard grids and prevent truncation cross columns */
+  .grid {
+    display: grid !important;
+    gap: 1.5rem !important;
+  }
+  
+  .grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .grid-cols-1, .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 20mm 15mm 20mm 15mm;
+  }
+
+  /* Prevent blocks from tearing in half awkwardly across A4 margins */
+  .bg-surface-card,
+  .bg-white,
+  .ai-summary-card,
+  tr,
+  td,
+  th {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Clean background adjustments for white printed paper sheets */
+  .bg-white, .bg-surface-card {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    border-radius: 12px !important;
+  }
+
+  .bg-primary-bg\/30 {
+    background-color: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 16px !important;
+  }
+
+  /* Style specific textual details */
+  .text-text-primary, .text-slate-800, .text-text-secondary {
+    color: #1e293b !important;
+  }
+
+  .text-text-muted, .text-slate-400 {
+    color: #475569 !important;
+  }
+
+  .text-primary {
+    color: #1e3a8a !important;
+  }
+
+  /* Ensure text sizing and visibility is pristine */
+  h1 {
+    font-size: 26pt !important;
+    color: #0f172a !important;
+  }
+
+  h2 {
+    font-size: 16pt !important;
+    color: #1e293b !important;
+  }
+
+  h3 {
+    font-size: 12pt !important;
+    color: #334155 !important;
+  }
+}
+

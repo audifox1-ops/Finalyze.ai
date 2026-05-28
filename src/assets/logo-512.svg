@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Rounded Square App Background -->
+  <rect width="512" height="512" rx="112" fill="#1E40AF"/>
+  
+  <!-- Content Group -->
+  <g transform="translate(96, 80)">
+    <!-- Shield (Trust & Stability) -->
+    <path d="M160 32 L40 80 C40 200 100 280 160 320 C220 280 280 200 280 80 Z" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="18" 
+          stroke-linejoin="round"
+          stroke-linecap="round"/>
+          
+    <!-- Grid lines inside shield (representing data integrity) -->
+    <path d="M80 140 H240 M60 200 H260 M90 260 H230" 
+          stroke="#FFFFFF" 
+          stroke-width="4" 
+          stroke-dasharray="8 8" 
+          opacity="0.3"/>
+    
+    <!-- Rising Graph Line (Growth & Gearing) -->
+    <path d="M70 240 L120 180 L180 210 L250 110" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="18" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+          
+    <!-- Upward arrow head -->
+    <path d="M210 110 H250 V150" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="18" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+          
+    <!-- Dynamic Accent Dot decoration -->
+    <circle cx="250" cy="110" r="12" fill="#10B981"/>
+  </g>
+</svg>
