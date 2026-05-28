@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createContext, useContext, useState, useEffect, ReactNode, createElement } from "react";
+import { createContext, useContext, useState, ReactNode, createElement } from "react";
 
 export type Language = "ko" | "en" | "ja" | "zh" | "de";
 
@@ -44,6 +44,18 @@ export interface TranslationPack {
     btnParse: string;
     parsingLabel: string;
     parseEmptyError: string;
+    tickerSearch: string;
+    tickerInput: string;
+    fetchData: string;
+    tickerLoading: string;
+    tickerExample: string;
+    tabTicker: string;
+    tabUpload: string;
+    // New autocomplete translations
+    searchPlaceholder: string;
+    noResults: string;
+    searchGuide: string;
+    orUploadFile: string;
   };
   dashboard: {
     metricsTitle: string;
@@ -136,7 +148,18 @@ export const translations: Record<Language, TranslationPack> = {
       btnUpload: "파일 선택하기",
       btnParse: "AI 공정 및 재무 데이터 분석 시작",
       parsingLabel: "AI 모델이 재무제표의 치수, 공차 및 손익 구조를 계산하는 중...",
-      parseEmptyError: "분석할 텍스트를 입력하거나 파일을 마운트하십시오."
+      parseEmptyError: "분석할 텍스트를 입력하거나 파일을 마운트하십시오.",
+      tickerSearch: "종목 검색",
+      tickerInput: "티커 입력",
+      fetchData: "가져오기",
+      tickerLoading: "데이터를 불러오는 중...",
+      tickerExample: "예: AAPL, 005930.KS",
+      tabTicker: "종목 코드로 불러오기",
+      tabUpload: "파일 직접 업로드",
+      searchPlaceholder: "종목명, 초성, 또는 티커 입력 (예: 삼성전자, ㅅㅅ전자, AAPL)...",
+      noResults: "검색 결과가 없습니다",
+      searchGuide: "종목명, 한글 초성 또는 영문 티커를 입력하면 실시간 유사 상장기업 목록을 추천하며, 즉시 수집 및 분석 단계로 인제스트합니다.",
+      orUploadFile: "또는 수동 파일 업로드 및 개별 원자재·재무 텍스트 입력창 열기"
     },
     dashboard: {
       metricsTitle: "핵심 기업 경영 재무 분석 지표",
@@ -186,7 +209,7 @@ export const translations: Record<Language, TranslationPack> = {
       screenshotLabel: "화면 스크린샷 레퍼런스 첨부 (선택)",
       submitBtn: "피드백 제출 완료하기",
       historyTitle: "로컬 피드백 보관소 로그",
-      historySubtitle: "브라우저 보안 인덱스에 저장된 수동 제출 기록 목록",
+      historySubtitle: "화면 스냅샷과 피드백 내역이 함께 로컬 브라우저에 축적됩니다.",
       noLogs: "등록된 피드백 로그가 없습니다.",
       clearLogs: "로그 전체 초기화",
       toastSubmitted: "피드백이 수동 보관소에 안전하게 누적 저장되었습니다!"
@@ -211,7 +234,6 @@ export const translations: Record<Language, TranslationPack> = {
     },
     nav: {
       dashboard: "Dashboard Workspace",
-      textPaste: "Data Ingestion",
       analysis: "AI Upload File",
       reports: "Reports Vault",
       feedbackLogs: "Feedback Log",
@@ -228,7 +250,18 @@ export const translations: Record<Language, TranslationPack> = {
       btnUpload: "Choose Local File",
       btnParse: "Synthesize Assets with Forging AI Model",
       parsingLabel: "Forging Master AI is parsing dimensions, margins, and yield ratios...",
-      parseEmptyError: "Please enter valid raw logs or attach a processing file first."
+      parseEmptyError: "Please enter valid raw logs or attach a processing file first.",
+      tickerSearch: "Ticker Search",
+      tickerInput: "Enter Ticker",
+      fetchData: "Fetch Data",
+      tickerLoading: "Loading financial data...",
+      tickerExample: "e.g., AAPL, 005930.KS",
+      tabTicker: "Import by Ticker",
+      tabUpload: "Direct File Upload",
+      searchPlaceholder: "Enter company name, chosung, or ticker (e.g. Samsung Electronics, AAPL)...",
+      noResults: "No results matching your query",
+      searchGuide: "Type company name, Korean chosung initials, or English tickers to dynamically suggest matched indices and ingest directly.",
+      orUploadFile: "Or build customized parsing with manually loaded spreadsheet documents/text"
     },
     dashboard: {
       metricsTitle: "Corporate Financial & Forging Metrics Monitor",
@@ -261,7 +294,7 @@ export const translations: Record<Language, TranslationPack> = {
       step2: "Step 2: AI Dynamic Optimization",
       step2Desc: "Our built-in Gemini API parses sizing allowances and generates core leverage ratios.",
       step3: "Step 3: Interactive Visualizations",
-      step3Desc: "Examine DuPont Dupont breakdowns, export reports, and save records to local Vault files."
+      step3Desc: "Examine DuPont breakdowns, export reports, and save records to local Vault files."
     },
     feedback: {
       button: "Feedback Support",
@@ -278,7 +311,7 @@ export const translations: Record<Language, TranslationPack> = {
       screenshotLabel: "Attach screenshot reference capture (Optional)",
       submitBtn: "Commit Local Feedback Log",
       historyTitle: "Local Browser Feedback Vault Logs",
-      historySubtitle: "Historic list of reports stored locally in sandbox browser",
+      historySubtitle: "History logs will accumulate in browser sandbox.",
       noLogs: "No feedback logs recorded yet.",
       clearLogs: "Wipe all feedback records",
       toastSubmitted: "Feedback logged in browser secure storage index!"
@@ -291,7 +324,7 @@ export const translations: Record<Language, TranslationPack> = {
       manualSave: "手動保存 (Save)",
       exportPdfHtml: "PDF/HTMLエクスポート",
       localArchiveConnected: "ローカルアーカイブ同期済み",
-      autoSynced: "オフライン同期が完了しました。以下のエクスポート形式を使用してください。",
+      autoSynced: "オフライン同期가 완료되었습니다.以下のエクスポート形式を使用してください。",
       savedSuccessfully: "ローカルストレージに正常に保存されました。",
       cancel: "キャンセル",
       submit: "送信する",
@@ -303,7 +336,6 @@ export const translations: Record<Language, TranslationPack> = {
     },
     nav: {
       dashboard: "ダッシュボード",
-      textPaste: "データインジェスト",
       analysis: "AI分析",
       reports: "レポート保管庫",
       feedbackLogs: "フィードバック",
@@ -320,7 +352,18 @@ export const translations: Record<Language, TranslationPack> = {
       btnUpload: "ファイルを選択",
       btnParse: "鍛造AI分析モデルの実行",
       parsingLabel: "鍛造Master AIが寸法、余裕、マージン比率を解析中...",
-      parseEmptyError: "有効なテキストまたはファイルをロードしてください。"
+      parseEmptyError: "有効なテキストまたはファイルをロードしてください。",
+      tickerSearch: "銘柄検索",
+      tickerInput: "ティッカー入力",
+      fetchData: "取得する",
+      tickerLoading: "データを読み込み中...",
+      tickerExample: "例: AAPL, 005930.KS",
+      tabTicker: "銘柄コードで読み込む",
+      tabUpload: "ファイルを直接アップロード",
+      searchPlaceholder: "銘柄名、頭文字、またはティッカーを入力...",
+      noResults: "一致する結果が見つかりません",
+      searchGuide: "銘柄名、日本語の頭文字、またはティッカーを入力すると、リアルタイムで一致を検索します。",
+      orUploadFile: "または、手動ファイルアップロード/テキスト貼り付け"
     },
     dashboard: {
       metricsTitle: "企業財務および鍛造指標モニター",
@@ -346,7 +389,7 @@ export const translations: Record<Language, TranslationPack> = {
     },
     emptyState: {
       title: "ダッシュボードがまだ有効化されていません",
-      subtitle: "鍛造の生産性計算やリスク分析のために、最初に財務、または寸法などのデータをロードしてください。",
+      subtitle: "鍛造の生産성계산 및 투자 분석을 위해 먼저 재무제표나 가공 치수 데이터를 업로드/입력해주세요.",
       button: "最初のAI分析を開始する",
       step1: "ステップ1: データの取り込み",
       step1Desc: "財務諸表、または鍛造余肉データをロードします。",
@@ -362,7 +405,7 @@ export const translations: Record<Language, TranslationPack> = {
       appraisal: "総合評価 (満足度スター)",
       classification: "フィードバックカテゴリ",
       bugReport: "バグ報告",
-      featureSuggest: "機能要求",
+      featureSuggest: "功能要求",
       praiseAccent: "推薦・賞賛",
       generalInquiry: "その他問い合わせ",
       summaryTitle: "一行タイトル",
@@ -370,7 +413,7 @@ export const translations: Record<Language, TranslationPack> = {
       screenshotLabel: "画面キャプチャの添付 (任意)",
       submitBtn: "フィードバック送信",
       historyTitle: "ローカル履歴ログ",
-      historySubtitle: "ローカルセキュリティサンドボックスに保存されたログ一覧",
+      historySubtitle: "ローカルアーカイブに保存されます。",
       noLogs: "登録済みのログはありません。",
       clearLogs: "ログを消去する",
       toastSubmitted: "フィードバックはオフラインデータベースに蓄積保存されました。"
@@ -395,7 +438,6 @@ export const translations: Record<Language, TranslationPack> = {
     },
     nav: {
       dashboard: "数据工作台",
-      textPaste: "数据导入",
       analysis: "AI分析上传",
       reports: "分析报告库",
       feedbackLogs: "意见反馈日志",
@@ -412,7 +454,18 @@ export const translations: Record<Language, TranslationPack> = {
       btnUpload: "选择电脑本地文件",
       btnParse: "启动智能锻造AI模型分析",
       parsingLabel: "AI模型正在解析材料尺寸、加工公差以及企业损益框架...",
-      parseEmptyError: "请您先输入有效的文本或者挂载分析文件。"
+      parseEmptyError: "请您先输入有效的文本或者挂载分析文件。",
+      tickerSearch: "股票代码搜索",
+      tickerInput: "输入股票代码",
+      fetchData: "获取",
+      tickerLoading: "正在加载数据...",
+      tickerExample: "例: AAPL, 005930.KS",
+      tabTicker: "通过股票代码加载",
+      tabUpload: "直接上传文件",
+      searchPlaceholder: "输入企业名称、拼音首字母或股票代码...",
+      noResults: "未查找到匹配的结果",
+      searchGuide: "输入企业名称、首字母简称或股票代码进行实时相似联想匹配。",
+      orUploadFile: "或者手动上传报表文件/贴入原账数据文本"
     },
     dashboard: {
       metricsTitle: "企业核心财务及锻造综合指标板",
@@ -462,7 +515,7 @@ export const translations: Record<Language, TranslationPack> = {
       screenshotLabel: "绑定屏幕调试捕获图 (可选)",
       submitBtn: "保存至本地日志中",
       historyTitle: "本地存储记录详情",
-      historySubtitle: "本款游览器内部安全沙盒保存的历史上报单列表",
+      historySubtitle: "在浏览器安全沙河保存。",
       noLogs: "当前没有留存任何反馈历史书。",
       clearLogs: "清空全部归档记录",
       toastSubmitted: "反馈文件已离线记录至游览器安全缓存池！"
@@ -487,7 +540,6 @@ export const translations: Record<Language, TranslationPack> = {
     },
     nav: {
       dashboard: "Dashboard",
-      textPaste: "Datenerfassung",
       analysis: "AI Upload",
       reports: "Berichtsarchiv",
       feedbackLogs: "Feedback Log",
@@ -504,7 +556,18 @@ export const translations: Record<Language, TranslationPack> = {
       btnUpload: "Datei auswählen",
       btnParse: "Analyse mit Forging AI-Modell starten",
       parsingLabel: "Forging Master AI berechnet Toleranzen, Aufmaße und Hebelzahlen...",
-      parseEmptyError: "Bitte geben Sie gültigen Rohtext ein oder hängen Sie eine Datei an."
+      parseEmptyError: "Bitte geben Sie gültigen Rohtext ein oder hängen Sie eine Datei an.",
+      tickerSearch: "Ticker-Suche",
+      tickerInput: "Ticker eingeben",
+      fetchData: "Daten abrufen",
+      tickerLoading: "Lade Finanzdaten...",
+      tickerExample: "z.B. AAPL, 005930.KS",
+      tabTicker: "Über Ticker importieren",
+      tabUpload: "Direkter Dateiupload",
+      searchPlaceholder: "Unternehmensname, Kürzel oder Ticker eingeben...",
+      noResults: "Keine Suchergebnisse gefunden",
+      searchGuide: "Geben Sie den Namen, die Anfangsbuchstaben oder das Tickersymbol ein, um eine Echtzeitsuche zu starten.",
+      orUploadFile: "Oder manuelle Dateien hochladen / Rohtext einfügen"
     },
     dashboard: {
       metricsTitle: "Finanzkennzahlen & Toleranz-Monitor",
@@ -542,7 +605,7 @@ export const translations: Record<Language, TranslationPack> = {
     feedback: {
       button: "Feedback Senden",
       title: "Anregungen und Fehlerberichte",
-      subtitle: "Wir prüfen alle Vorschläge gründlich, um Toleranzen und Reaktionszeiten zu optimieren.",
+      subtitle: "Wir prüfen alle Vorschläge gründlich, um Toleranzen und Revisionszeiten zu optimieren.",
       appraisal: "Gesamtbewertung der Anwendung (Sterne)",
       classification: "Informationstyp Klassifizierung",
       bugReport: "Fehlermeldung (Bug)",
@@ -554,7 +617,7 @@ export const translations: Record<Language, TranslationPack> = {
       screenshotLabel: "Screenshot anhängen (Optional)",
       submitBtn: "Manuelles Feedback-Log sichern",
       historyTitle: "Lokaler Feedback-Meldungsspeicher",
-      historySubtitle: "Liste der im Browser-Sicherheitsbereich abgelegten Meldungen",
+      historySubtitle: "Wird im Sandbox-Speicher aufbewahrt.",
       noLogs: "Keine lokalen Einträge gefunden.",
       clearLogs: "Alle Einträge leeren",
       toastSubmitted: "Feedback wurde erfolgreich im Offline-Sandbox-Speicher registriert!"
@@ -571,11 +634,14 @@ export interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+  // STRICT RULE: Force "ko" (Korean) as default language on first visit, ignoring browser defaults.
   const [language, setLanguageState] = useState<Language>(() => {
     try {
       const saved = localStorage.getItem("finalyze_ai_user_lang");
       if (saved && (saved === "ko" || saved === "en" || saved === "ja" || saved === "zh" || saved === "de")) {
         return saved as Language;
+      } else {
+        localStorage.setItem("finalyze_ai_user_lang", "ko");
       }
     } catch (e) {
       console.warn("Could not read language from local storage", e);
@@ -592,7 +658,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Helper function to resolve dot-notated translation strings (e.g., "common.appTitle")
   const t = (path: string): string => {
     const parts = path.split(".");
     let current: any = translations[language];

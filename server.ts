@@ -159,6 +159,44 @@ app.post("/api/analyze", async (req, res) => {
   }
 });
 
+// API Route for Company Search (autocomplete mapping)
+app.post("/api/search", async (req, res) => {
+  try {
+    const { query } = req.body;
+    if (!query || query.trim().length === 0) {
+      return res.json({ success: true, data: [] });
+    }
+
+    const searchPrompt = `
+      You are an expert stock finder. The user is searching for Korean or Global companies on Financial Modeling Prep (FMP).
+      They might input complete names, partial names, Korean chosung initials (e.g. 'ㅅㅅ' or 'ㅅㅅㅈㅈ' for 삼성전자), or tickers.
+      Given the input query: "${query}", return a list of exactly up to 5 matching major publicly traded companies.
+      Each entry MUST have its official Korean/English name and its exact FMP ticker suffix (e.g., '.KS' for KOSPI, '.KQ' for KOSDAQ, or standard US tickers like 'AAPL').
+      
+      Respond strictly in JSON array format:
+      [
+        { "name": "Company Name", "ticker": "005930.KS" }
+      ]
+      No markdown, no backticks, no extra text. Only return the JSON array.
+    `;
+
+    const result = await model.generateContent(searchPrompt);
+    const response = await result.response;
+    const text = response.text().trim();
+    
+    let jsonText = text;
+    if (text.startsWith("```")) {
+      jsonText = text.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+    }
+    
+    const matched = JSON.parse(jsonText);
+    res.json({ success: true, data: Array.isArray(matched) ? matched : [] });
+  } catch (error: any) {
+    console.error("AI Search Error:", error);
+    res.json({ success: true, data: [] });
+  }
+});
+
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
